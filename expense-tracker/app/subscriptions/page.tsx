@@ -3,6 +3,8 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { pool } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 async function getSubscriptions() {
   const { rows } = await pool.query(
     `SELECT s.*, c.name AS category_name

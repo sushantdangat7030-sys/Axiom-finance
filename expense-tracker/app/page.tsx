@@ -8,6 +8,8 @@ import { SpendChart } from "@/components/spend-chart";
 import { pool } from "@/lib/db";
 import { getMonthlySpendByCategory } from "@/lib/spending";
 
+export const dynamic = "force-dynamic";
+
 async function getAccountCount() {
   const { rows } = await pool.query("SELECT count(*)::int AS count FROM accounts");
   return rows[0].count as number;

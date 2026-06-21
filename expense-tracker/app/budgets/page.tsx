@@ -4,6 +4,8 @@ import { Progress } from "@/components/ui/progress";
 import { pool } from "@/lib/db";
 import { getCurrentMonthSpendByCategory } from "@/lib/spending";
 
+export const dynamic = "force-dynamic";
+
 async function getBudgets() {
   const { rows } = await pool.query(
     `SELECT b.*, c.name AS category_name
