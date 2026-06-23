@@ -1,14 +1,14 @@
-export const CATEGORY_NAMES = [
-  "Restaurants",
-  "Groceries",
-  "Subscriptions",
-  "Transportation",
-  "Shopping",
-  "Utilities",
-  "Entertainment",
-  "Health",
+export const CATEGORIES = [
+  "Food",
+  "Rent",
   "Travel",
+  "Bills",
+  "Shopping",
   "Other",
 ] as const;
 
-export type CategoryName = (typeof CATEGORY_NAMES)[number];
+export type Category = (typeof CATEGORIES)[number];
+
+export const TRANSACTION_TYPES = ["income", "expense"] as const;
+
+export type TransactionType = (typeof TRANSACTION_TYPES)[number];
