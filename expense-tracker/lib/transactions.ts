@@ -1,16 +1,26 @@
 import { prisma } from "@/lib/prisma";
 
-export async function getTransactions({ from, to }: { from?: Date; to?: Date }) {
+export async function getTransactions({
+  userId,
+  from,
+  to,
+}: {
+  userId: string;
+  from?: Date;
+  to?: Date;
+}) {
   return prisma.transaction.findMany({
-    where:
-      from || to
+    where: {
+      userId,
+      ...(from || to
         ? {
             date: {
               ...(from ? { gte: from } : {}),
               ...(to ? { lte: to } : {}),
             },
           }
-        : undefined,
+        : {}),
+    },
     orderBy: { date: "desc" },
   });
 }

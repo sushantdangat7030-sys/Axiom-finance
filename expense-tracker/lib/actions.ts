@@ -3,6 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES, TRANSACTION_TYPES } from "@/lib/categories";
+import { getCurrentUserId } from "@/lib/session";
+
+async function requireUserId() {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    throw new Error("Not authenticated");
+  }
+  return userId;
+}
 
 function parseTransactionForm(formData: FormData) {
   const type = formData.get("type");
@@ -35,18 +44,21 @@ function parseTransactionForm(formData: FormData) {
 }
 
 export async function createTransaction(formData: FormData) {
+  const userId = await requireUserId();
   const data = parseTransactionForm(formData);
-  await prisma.transaction.create({ data });
+  await prisma.transaction.create({ data: { ...data, userId } });
   revalidatePath("/");
 }
 
 export async function updateTransaction(id: string, formData: FormData) {
+  const userId = await requireUserId();
   const data = parseTransactionForm(formData);
-  await prisma.transaction.update({ where: { id }, data });
+  await prisma.transaction.updateMany({ where: { id, userId }, data });
   revalidatePath("/");
 }
 
 export async function deleteTransaction(id: string) {
-  await prisma.transaction.delete({ where: { id } });
+  const userId = await requireUserId();
+  await prisma.transaction.deleteMany({ where: { id, userId } });
   revalidatePath("/");
 }
