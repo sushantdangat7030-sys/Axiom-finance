@@ -1,0 +1,12 @@
+{
+  "name": "Axiom Finance",
+  "short_name": "Axiom",
+  "description": "Personal expense splitting + money tracking. Free, private, offline-friendly.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#1a1a19",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

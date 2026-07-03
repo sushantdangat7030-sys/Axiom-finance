@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Axiom Finance</title>
+<meta name="description" content="Personal finance + expense splitting. Your data stays in your browser.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1a1a19">
+<link rel="stylesheet" href="styles.css">
+<script>
+// Apply saved theme before first paint
+(function(){
+  try{
+    var d = JSON.parse(localStorage.getItem('axiom-finance-v1')||'null');
+    var t = d && d.settings && d.settings.theme;
+    if(t==='light'||t==='dark') document.documentElement.dataset.theme = t;
+  }catch(e){}
+})();
+</script>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="logo"><span class="logo-mark">◆</span><span class="logo-text">Axiom<em>Finance</em></span></div>
+    <nav id="nav">
+      <a href="#/dashboard" data-route="dashboard"><span class="nav-ic">▦</span>Dashboard</a>
+      <a href="#/split" data-route="split"><span class="nav-ic">⇄</span>Split</a>
+      <a href="#/transactions" data-route="transactions"><span class="nav-ic">≡</span>Transactions</a>
+      <a href="#/budgets" data-route="budgets"><span class="nav-ic">◔</span>Budgets</a>
+      <a href="#/accounts" data-route="accounts"><span class="nav-ic">▣</span>Accounts</a>
+      <a href="#/settings" data-route="settings"><span class="nav-ic">⚙</span>Settings</a>
+    </nav>
+    <button id="theme-toggle" class="btn ghost" title="Toggle theme">◐ Theme</button>
+  </aside>
+  <main id="view" tabindex="-1"></main>
+</div>
+<div id="modal-root"></div>
+<div id="toast-root" aria-live="polite"></div>
+<div id="chart-tip" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
