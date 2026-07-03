@@ -30,6 +30,13 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+  // magic-link landing: forward the one-time code to the auth callback
+  const code = request.nextUrl.searchParams.get("code");
+  if (!user && code && !pathname.startsWith("/auth")) {
+    const cb = new URL("/auth/callback", request.url);
+    cb.searchParams.set("code", code);
+    return NextResponse.redirect(cb);
+  }
   const isPublic = pathname.startsWith("/login") || pathname.startsWith("/auth");
   if (!user && !isPublic && !pathname.startsWith("/api"))
     return NextResponse.redirect(new URL("/login", request.url));
