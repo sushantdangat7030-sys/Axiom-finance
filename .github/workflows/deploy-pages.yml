@@ -2,7 +2,7 @@ name: Deploy Axiom Finance to GitHub Pages
 
 on:
   push:
-    branches: [claude/expense-splitting-app-6jfcjq]
+    branches: [claude/version-check-x8bc6n]  # default branch — the only one Pages accepts deploys from
   workflow_dispatch:
 
 permissions:
