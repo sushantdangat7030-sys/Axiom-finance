@@ -3,10 +3,19 @@ import { NextResponse, type NextRequest } from "next/server";
 
 /** Refresh the Supabase session and gate the app behind login. */
 export async function proxy(request: NextRequest) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  if (!url || !key || !/^https:\/\/.+\.supabase\.co$/.test(url)) {
+    return new NextResponse(
+      `Setup problem: the Vercel environment variable ${!url ? "NEXT_PUBLIC_SUPABASE_URL is missing" : !key ? "NEXT_PUBLIC_SUPABASE_ANON_KEY is missing" : `NEXT_PUBLIC_SUPABASE_URL looks wrong (got "${url}", expected https://xxxx.supabase.co)`}. Fix it in Vercel → Settings → Environment Variables, then Redeploy.`,
+      { status: 500 }
+    );
+  }
   let response = NextResponse.next({ request });
+  try {
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    key,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
@@ -27,6 +36,13 @@ export async function proxy(request: NextRequest) {
   if (user && pathname.startsWith("/login"))
     return NextResponse.redirect(new URL("/", request.url));
   return response;
+  } catch (e) {
+    return new NextResponse(
+      `Setup problem while contacting Supabase: ${(e as Error).message}. ` +
+      `Check the Supabase URL and keys in Vercel → Settings → Environment Variables, then Redeploy.`,
+      { status: 500 }
+    );
+  }
 }
 
 export const config = {
