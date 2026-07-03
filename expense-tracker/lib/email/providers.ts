@@ -9,15 +9,15 @@ const CFG = {
     authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
     tokenUrl: "https://oauth2.googleapis.com/token",
     scope: "https://www.googleapis.com/auth/gmail.readonly openid email",
-    clientId: () => process.env.GOOGLE_CLIENT_ID!,
-    clientSecret: () => process.env.GOOGLE_CLIENT_SECRET!,
+    clientId: () => process.env.GOOGLE_CLIENT_ID?.trim() ?? "",
+    clientSecret: () => process.env.GOOGLE_CLIENT_SECRET?.trim() ?? "",
   },
   outlook: {
     authUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
     tokenUrl: "https://login.microsoftonline.com/common/oauth2/v2.0/token",
     scope: "https://graph.microsoft.com/Mail.Read offline_access openid email",
-    clientId: () => process.env.MS_CLIENT_ID!,
-    clientSecret: () => process.env.MS_CLIENT_SECRET!,
+    clientId: () => process.env.MS_CLIENT_ID?.trim() ?? "",
+    clientSecret: () => process.env.MS_CLIENT_SECRET?.trim() ?? "",
   },
 } as const;
 
