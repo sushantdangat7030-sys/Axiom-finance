@@ -48,7 +48,13 @@ function load(){
   try{ const d = JSON.parse(localStorage.getItem(LS_KEY)); if(d && d.version===1) return d; }catch(e){}
   return null;
 }
-function save(){ localStorage.setItem(LS_KEY, JSON.stringify(DB)); }
+let warnedNoStore = false;
+function save(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(DB)); }
+  catch(e){
+    if(!warnedNoStore){ warnedNoStore=true; toast('⚠ Storage unavailable — changes won’t survive a reload. Use Settings → Export to save.'); }
+  }
+}
 
 /* ---------- utils ---------- */
 const $ = s=>document.querySelector(s);
