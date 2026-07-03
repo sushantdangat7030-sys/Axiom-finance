@@ -1,63 +1,79 @@
-import { SubscriptionRow } from "@/components/subscription-row";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { pool } from "@/lib/db";
+"use client";
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-async function getSubscriptions() {
-  const { rows } = await pool.query(
-    `SELECT s.*, c.name AS category_name
-     FROM subscriptions s
-     LEFT JOIN categories c ON c.id = s.category_id
-     ORDER BY s.amount DESC`
-  );
-  return rows;
-}
+type Sub = {
+  id: string; merchant: string; amount: number; currency: string;
+  frequency: string; next_billing_date: string | null;
+  monthly_cost: number; annual_cost: number; status: string;
+};
 
-function SubscriptionTable({ subscriptions }: { subscriptions: Awaited<ReturnType<typeof getSubscriptions>> }) {
-  if (subscriptions.length === 0) {
-    return <p className="text-muted-foreground p-4 text-sm">No subscriptions here.</p>;
+const fmt = (n: number, cur: string) =>
+  new Intl.NumberFormat(cur === "INR" ? "en-IN" : "en",
+    { style: "currency", currency: cur || "USD", maximumFractionDigits: 2 }).format(n);
+
+export default function SubscriptionsPage() {
+  const [subs, setSubs] = useState<Sub[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  const load = useCallback(async () => {
+    const d = await (await fetch("/api/subscriptions")).json();
+    setSubs(d.subscriptions ?? []);
+  }, []);
+  useEffect(() => { load(); }, [load]);
+
+  async function redetect() {
+    setBusy(true);
+    await fetch("/api/subscriptions", { method: "POST" });
+    await load();
+    setBusy(false);
   }
+
+  const active = subs.filter((s) => s.status === "active");
+  const monthly = active.reduce((s, x) => s + Number(x.monthly_cost), 0);
+  const cur = active[0]?.currency ?? "USD";
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Merchant</TableHead>
-          <TableHead>Amount</TableHead>
-          <TableHead>Frequency</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Next charge</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Action</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {subscriptions.map((s) => (
-          <SubscriptionRow key={s.id} subscription={s} />
+    <main className="mx-auto max-w-4xl space-y-4 p-4 sm:p-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Subscriptions</h1>
+        <Button variant="outline" size="sm" onClick={redetect} disabled={busy}>
+          {busy ? "Detecting…" : "Re-detect from transactions"}
+        </Button>
+      </div>
+      {active.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          {active.length} active · {fmt(monthly, cur)}/month · {fmt(monthly * 12, cur)}/year projected
+        </p>
+      )}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {active.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            No recurring payments detected yet. Import a few months of data, then re-detect.
+          </p>
+        )}
+        {active.map((s) => (
+          <Card key={s.id}>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center justify-between text-base">
+                <span>{s.merchant}</span>
+                <Badge variant="outline">{s.frequency}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              <div className="text-lg font-semibold tabular-nums">{fmt(Number(s.amount), s.currency)}</div>
+              {s.next_billing_date && (
+                <div className="text-muted-foreground">Next bill: {s.next_billing_date}</div>
+              )}
+              <div className="text-muted-foreground">
+                {fmt(Number(s.monthly_cost), s.currency)}/mo · {fmt(Number(s.annual_cost), s.currency)}/yr
+              </div>
+            </CardContent>
+          </Card>
         ))}
-      </TableBody>
-    </Table>
-  );
-}
-
-export default async function SubscriptionsPage() {
-  const subscriptions = await getSubscriptions();
-  const flagged = subscriptions.filter((s) => s.status === "flagged_for_cancellation");
-
-  return (
-    <main className="flex flex-1 flex-col gap-6 p-8">
-      <h1 className="text-2xl font-semibold">Subscriptions</h1>
-      <Tabs defaultValue="all">
-        <TabsList>
-          <TabsTrigger value="all">All ({subscriptions.length})</TabsTrigger>
-          <TabsTrigger value="flagged">Flagged for cancellation ({flagged.length})</TabsTrigger>
-        </TabsList>
-        <TabsContent value="all">
-          <SubscriptionTable subscriptions={subscriptions} />
-        </TabsContent>
-        <TabsContent value="flagged">
-          <SubscriptionTable subscriptions={flagged} />
-        </TabsContent>
-      </Tabs>
+      </div>
     </main>
   );
 }

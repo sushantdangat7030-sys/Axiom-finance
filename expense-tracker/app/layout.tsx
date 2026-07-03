@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Expense Tracker",
-  description: "Personal finance dashboard: subscriptions, budgets, and spending insights.",
+  title: "Axiom Finance",
+  description: "Automated personal finance: email + file ingestion, AI categorization, subscriptions, insights.",
 };
 
 export default function RootLayout({
